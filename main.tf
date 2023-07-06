@@ -11,7 +11,7 @@ module "lambda" {
     source = "./lambda"
     sns_topic_arn = module.sns.sns_topic_arn
     cloudwatch_arn = module.cloudwatch_event.cloudwatch_arn
-    depends_on = [module.cloudwatch_event.aws_cloudwatch_event_rule.ec2_state_change_rule]
+    # depends_on = [module.cloudwatch_event.aws_cloudwatch_event_rule.ec2_state_change_rule]
 }
 
 
