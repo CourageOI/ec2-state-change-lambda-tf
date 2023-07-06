@@ -33,6 +33,10 @@ resource "aws_lambda_function" "ec2_state_change_lambda" {
   source_code_hash = filebase64sha256("lambda_function.zip")
   role             = aws_iam_role.lambda_role.arn
 
+   # Add the CloudWatch Events trigger
+  event_source_token = var.cloudwatch_arn
+  depends_on = [aws_cloudwatch_event_rule.ec2_state_change_rule]
+
   # Add environment variables
   environment {
     variables = {
