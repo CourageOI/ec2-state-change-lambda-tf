@@ -35,7 +35,6 @@ resource "aws_lambda_function" "ec2_state_change_lambda" {
 
    # Add the CloudWatch Events trigger
   event_source_token = var.cloudwatch_arn
-  depends_on = [aws_cloudwatch_event_rule.ec2_state_change_rule]
 
   # Add environment variables
   environment {
