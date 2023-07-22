@@ -1,5 +1,3 @@
-
-
 # Create the SNS topic
 resource "aws_sns_topic" "ec2_state_change_topic" {
   name = "ec2_state_change_topic"

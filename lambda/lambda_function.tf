@@ -24,13 +24,19 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
 }
 
+# zip the python file
+data "archive_file" "zip_lambda" {
+type        = "zip"
+source_dir  = "${path.module}"
+output_path = "${path.module}/lambda_function.zip"
+}
 # Create the Lambda function
 resource "aws_lambda_function" "ec2_state_change_lambda" {
   function_name    = "ec2_state_change_notification"
   handler          = "lambda_function.lambda_handler"
-  runtime          = "python3.8"
-  filename         = "lambda_function.zip"
-  source_code_hash = filebase64sha256("lambda_function.zip")
+  runtime          = "python3.10"
+  filename         = "${path.module}/lambda_function.zip"
+  source_code_hash = data.archive_file.zip_lambda.output_base64sha256
   role             = aws_iam_role.lambda_role.arn
 
   # Add environment variables
