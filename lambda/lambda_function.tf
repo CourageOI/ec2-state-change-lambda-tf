@@ -45,5 +45,6 @@ resource "aws_lambda_function" "ec2_state_change_lambda" {
       SNS_TOPIC_ARN = var.sns_topic_arn
     }
   }
+  publish = true
 }
 
