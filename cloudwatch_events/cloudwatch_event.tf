@@ -12,7 +12,7 @@ resource "aws_cloudwatch_event_rule" "ec2_state_change_rule" {
 })
 }
 
-resource resource "aws_cloudwatch_event_target" "ec2_state_change_target"{
+resource "aws_cloudwatch_event_target" "ec2_state_change_target"{
   rule      = aws_cloudwatch_event_rule.ec2_state_change_rule.name
   arn       = var.lambda_function_arn
   target_id = "lambda_target"
