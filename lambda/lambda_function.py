@@ -11,7 +11,7 @@ def lambda_handler(event, context):
   # Get the details of the EC2 instance state change from the event.
   instance_id = event['detail']['instance-id']
   state = event['detail']['state']
-  user_name = event['detail']['user-name']
+  user_name = event['detail']
 
   # Get the SNS topic ARN from the environment variable.
   sns_topic_arn = os.environ['SNS_TOPIC_ARN']
