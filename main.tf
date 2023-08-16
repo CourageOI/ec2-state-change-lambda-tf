@@ -8,7 +8,7 @@ module "sns" {
 
 
 # Calling cloudtrail resource
-module "lambda" {
+module "cloudtrail" {
     source = "./cloudtrail"
 }
 # Calling lambda function module
