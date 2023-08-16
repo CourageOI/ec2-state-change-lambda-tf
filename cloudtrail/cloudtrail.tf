@@ -1,8 +1,17 @@
 resource "aws_s3_bucket" "cloudtrail_logs" {
-  bucket = "demo-unique-cloudtrail-bucket-name"
-  acl    = "private"
+  bucket = "your-unique-cloudtrail-bucket-name"
 }
 
+resource "aws_s3_bucket_acl" "cloudtrail_logs_acl" {
+  bucket = aws_s3_bucket.cloudtrail_logs.id
+
+  grants = [
+    {
+      id          = "canonical_user_id"
+      permissions = ["FULL_CONTROL"]
+    }
+  ]
+}
 resource "aws_cloudtrail" "cloudtrail_event" {
   name                          = "cloudtrail_event"
   s3_bucket_name                = aws_s3_bucket.cloudtrail_logs.id
@@ -12,9 +21,5 @@ resource "aws_cloudtrail" "cloudtrail_event" {
   event_selector {
     read_write_type = "All"
     include_management_events = true
-    data_resource {
-      type   = "AWS::EC2::Instance"
-      values = ["*"]
-    }
   }
 }
