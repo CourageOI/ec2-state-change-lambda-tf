@@ -1,31 +1,27 @@
-# lambda_function.py
-
-import json
 import boto3
-import os
+import json
 
 def lambda_handler(event, context):
- 
-  sns_client = boto3.client('sns')
-
-  # Get the details of the EC2 instance state change from the event.
-  instance_id = event['detail']['instance-id']
-  state = event['detail']['state']
-  user_name = event['detail']['userIdentity']
-
-  # Get the SNS topic ARN from the environment variable.
-  sns_topic_arn = os.environ['SNS_TOPIC_ARN']
-
-  # Send an email notification with the details of the EC2 instance state change.
-  message = f'EC2 instance {instance_id} has changed state to {state}.\n\n' \
-           f'This change was made by user {user_name}.'
-  sns_client.publish(
-    TopicArn=sns_topic_arn,
-    Message=message
-  )
-
-  return {
-    'statusCode': 200,
-    'body': json.dumps('Successfully sent email notification.')
-  }
-
+    sns_client = boto3.client('sns')
+    
+    for record in event['Records']:
+        payload = json.loads(record['Sns']['Message'])
+        event_name = payload['detail']['eventName']
+        if event_name in ["ModifyInstanceAttribute", "RunInstances", "TerminateInstances", "StopInstances", "CreateInstances"]:
+            instance_id = payload['detail']['requestParameters'].get('instancesSet', {}).get('items', [{}])[0].get('instanceId', 'N/A')
+            user_identity = payload['detail']['userIdentity']['userName']
+            
+            message = f"EC2 instance {instance_id} state changed. \nEvent description: {event_name}. \nThis changes was made by: {user_identity}."
+            
+            response = sns_client.publish(
+                TopicArn='your-sns-topic-arn',
+                Message=message,
+                Subject='EC2 State Change Notification'
+            )
+            
+            print(f"Notification sent: {response['MessageId']}")
+            
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Notification sent successfully')
+    }

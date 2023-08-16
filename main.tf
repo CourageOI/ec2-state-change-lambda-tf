@@ -6,6 +6,11 @@ module "sns" {
     email_address = "osakpolor.ihensekhien@gmail.com"
 }
 
+
+# Calling cloudtrail resource
+module "lambda" {
+    source = "./cloudtrail"
+}
 # Calling lambda function module
 module "lambda" {
     source = "./lambda"

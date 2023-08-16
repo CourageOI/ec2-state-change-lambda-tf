@@ -4,12 +4,13 @@ resource "aws_cloudwatch_event_rule" "ec2_state_change_rule" {
   description = "Trigger Lambda function on EC2 state changes"
 
   event_pattern = jsonencode({
-  "source": ["aws.ec2"],
-  "detail-type": ["EC2 Instance State-change Notification"],
-  "detail": {
-    "state": ["running", "stopped", "terminated"]
-  }
-})
+    source      = ["aws.cloudtrail"]
+    detail_type = ["AWS API Call via CloudTrail"]
+    detail      = {
+      eventSource = ["ec2.amazonaws.com"]
+      eventName   = ["ModifyInstanceAttribute", "RunInstances", "TerminateInstances", "StopInstances", "CreateInstances"]
+    }
+  })
 }
 
 resource "aws_cloudwatch_event_target" "ec2_state_change_target"{
