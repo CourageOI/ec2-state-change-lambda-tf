@@ -2,15 +2,23 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket = "your-unique-cloudtrail-bucket-name"
 }
 
-resource "aws_s3_bucket_acl" "cloudtrail_logs_acl" {
+resource "aws_s3_bucket_policy" "cloudtrail_logs_policy" {
   bucket = aws_s3_bucket.cloudtrail_logs.id
 
-  grants = [
-    {
-      id          = "canonical_user_id"
-      permissions = ["FULL_CONTROL"]
-    }
-  ]
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
+        Effect = "Allow",
+        Resource = [
+          "${aws_s3_bucket.cloudtrail_logs.arn}",
+          "${aws_s3_bucket.cloudtrail_logs.arn}/*",
+        ],
+        Principal = "*"
+      }
+    ]
+  })
 }
 resource "aws_cloudtrail" "cloudtrail_event" {
   name                          = "cloudtrail_event"
