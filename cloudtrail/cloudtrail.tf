@@ -1,37 +1,19 @@
 resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket = "cloudtrail-logs-test"
-  acl = "private"
-  force_destroy = true
+}
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "aws:kms"
-      }
+resource "aws_s3_bucket_acl" "cloudtrail_logs_acl" {
+  bucket = aws_s3_bucket.cloudtrail_logs.id
+
+  # Configure the ACL as needed
+  # For example, to make the bucket private:
+  grants = [
+    {
+      type        = "CanonicalUser"
+      permissions = ["FULL_CONTROL"]
+      id          = aws_canonical_user_id.current.id
     }
-  }
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid = "AllowCloudTrailToWriteLogs",
-        Effect = "Allow",
-        Principal = {
-          Service = "cloudtrail.amazonaws.com"
-        },
-        Action = [
-          "s3:PutObject",
-          "s3:GetObject",
-          "s3:ListBucket"
-        ],
-        Resource = [
-          "${aws_s3_bucket.cloudtrail_logs.arn}",
-          "${aws_s3_bucket.cloudtrail_logs.arn}/*"
-        ]
-      }
-    ]
-  })
+  ]
 }
 
 resource "aws_cloudtrail" "cloudtrail_logs_test" {
