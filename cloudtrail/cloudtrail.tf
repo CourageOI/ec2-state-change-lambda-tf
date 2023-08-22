@@ -1,45 +1,54 @@
+provider "aws" {
+  region = "us-east-1"  # Update with your desired region
+}
+
 resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket = "cloudtrail-logs-test"
   acl = "private"
   force_destroy = true
 
-  # Enable server-side encryption with default encryption key
   server_side_encryption_configuration {
     rule {
-      bucket_key_enabled = true
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "aws:kms"
+      }
     }
   }
 
-  # Add policy to allow CloudTrail to write logs to the bucket
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "AllowCloudTrailToWriteLogs",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "cloudtrail.amazonaws.com"
-      },
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:ListObject"
-      ],
-      "Resource": "${aws_s3_bucket.cloudtrail_logs.arn}/*"
-    }
-  ]
-}
-POLICY
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid = "AllowCloudTrailToWriteLogs",
+        Effect = "Allow",
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        },
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "${aws_s3_bucket.cloudtrail_logs.arn}",
+          "${aws_s3_bucket.cloudtrail_logs.arn}/*"
+        ]
+      }
+    ]
+  })
 }
 
-resource "aws_cloudtrail" "cloudtrail_logs-test" {
-  name = "cloudtrail-default"
-  bucket = aws_s3_bucket.cloudtrail_logs.bucket
+resource "aws_cloudtrail" "cloudtrail_logs_test" {
+  name     = "cloudtrail-default"
+  s3_bucket_name = aws_s3_bucket.cloudtrail_logs.id
   enable_log_file_validation = true
 
-  # Configure CloudTrail to log all events
-  trail_filter {
-    name = "All"
+  event_selector {
+    read_write_type = "All"
+    include_management_events = true
   }
+}
+
+output "cloudtrail_source_arn" {
+  value = aws_cloudtrail.cloudtrail_logs_test.arn
 }
