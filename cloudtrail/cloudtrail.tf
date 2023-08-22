@@ -33,7 +33,7 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
 POLICY
 }
 
-resource "aws_cloudtrail" "default" {
+resource "aws_cloudtrail" "cloudtrail_logs-test" {
   name = "cloudtrail-default"
   bucket = aws_s3_bucket.cloudtrail_logs.bucket
   enable_log_file_validation = true
