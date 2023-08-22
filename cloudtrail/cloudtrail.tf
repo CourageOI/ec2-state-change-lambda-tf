@@ -1,33 +1,45 @@
 resource "aws_s3_bucket" "cloudtrail_logs" {
-  bucket = "your-unique-cloudtrail-bucket-name"
+  bucket = "cloudtrail-logs-test"
+  acl = "private"
+  force_destroy = true
+
+  # Enable server-side encryption with default encryption key
+  server_side_encryption_configuration {
+    rule {
+      bucket_key_enabled = true
+    }
+  }
+
+  # Add policy to allow CloudTrail to write logs to the bucket
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowCloudTrailToWriteLogs",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "cloudtrail.amazonaws.com"
+      },
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListObject"
+      ],
+      "Resource": "${aws_s3_bucket.cloudtrail_logs.arn}/*"
+    }
+  ]
+}
+POLICY
 }
 
-resource "aws_s3_bucket_policy" "cloudtrail_logs_policy" {
-  bucket = aws_s3_bucket.cloudtrail_logs.id
+resource "aws_cloudtrail" "default" {
+  name = "cloudtrail-default"
+  bucket = aws_s3_bucket.cloudtrail_logs.bucket
+  enable_log_file_validation = true
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
-        Effect = "Allow",
-        Resource = [
-          "${aws_s3_bucket.cloudtrail_logs.arn}",
-          "${aws_s3_bucket.cloudtrail_logs.arn}/*",
-        ],
-        Principal = "*"
-      }
-    ]
-  })
-}
-resource "aws_cloudtrail" "cloudtrail_event" {
-  name                          = "cloudtrail_event"
-  s3_bucket_name                = aws_s3_bucket.cloudtrail_logs.id
-  enable_logging                = true
-  include_global_service_events = true
-
-  event_selector {
-    read_write_type = "All"
-    include_management_events = true
+  # Configure CloudTrail to log all events
+  trail_filter {
+    name = "All"
   }
 }
