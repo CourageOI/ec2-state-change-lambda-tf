@@ -44,7 +44,3 @@ resource "aws_cloudtrail" "cloudtrail_logs_test" {
     include_management_events = true
   }
 }
-
-output "cloudtrail_source_arn" {
-  value = aws_cloudtrail.cloudtrail_logs_test.arn
-}
