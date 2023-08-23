@@ -27,8 +27,8 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 # zip the python file
 data "archive_file" "zip_lambda" {
 type        = "zip"
-source_dir  = "${path.module}"
-output_path = "${path.module}/lambda_function.zip"
+source_dir  = "${path.module}/python_code"
+output_path = "${path.module}/python/lambda_function.zip"
 }
 # Create the Lambda function
 resource "aws_lambda_function" "ec2_state_change_lambda" {
