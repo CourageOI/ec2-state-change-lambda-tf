@@ -35,7 +35,7 @@ resource "aws_lambda_function" "ec2_state_change_lambda" {
   function_name    = "ec2_state_change_notification"
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.10"
-  filename         = "${path.module}/lambda_function.zip"
+  filename         = "${path.module}/python/lambda_function.zip"
   source_code_hash = data.archive_file.zip_lambda.output_base64sha256
   role             = aws_iam_role.lambda_role.arn
 
